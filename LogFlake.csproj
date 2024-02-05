@@ -8,10 +8,10 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/CloudPhoenix/logflake-client-netstandard</RepositoryUrl>
+    <RepositoryUrl>https://github.com/CloudPhoenix/logflake-client-netcore</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>LogFlake;CloudPhoenix;Cloud Phoenix;Log Flake;Log;Logs</PackageTags>
-    <Description>LogFlake Client .net Standard</Description>
+    <Description>LogFlake Client .net Core</Description>
   </PropertyGroup>
 
   <ItemGroup>
