@@ -7,9 +7,9 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using LogFlake.Models;
+using NLogFlake.Models;
 
-namespace LogFlake
+namespace NLogFlake
 {
     public class LogFlake
     {
