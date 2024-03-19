@@ -12,11 +12,8 @@ namespace NLogFlake.Models
 
         [JsonPropertyName("hostname")]
         public string Hostname { get; set; }
-
+        
         [JsonPropertyName("level")]
-        public string InternalLevel { get => Level.ToString(); }
-
-        [JsonIgnore]
         public LogLevels Level { get; set; }
 
         [JsonPropertyName("content")]

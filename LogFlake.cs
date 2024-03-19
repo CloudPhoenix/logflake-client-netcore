@@ -70,14 +70,12 @@ namespace NLogFlake
             if (queueName != Queues.LOGS && queueName != Queues.PERFORMANCES) return false;
             try
             {
-                using (var client = new HttpClient())
-                {
-                    client.BaseAddress = new Uri($"{Server}");
-                    client.Timeout = TimeSpan.FromSeconds(PostTimeoutSeconds);
-                    var json = new StringContent(jsonString, Encoding.UTF8, "application/json");
-                    var result = await client.PostAsync($"/api/ingestion/{AppId}/{queueName}", json);
-                    return result.IsSuccessStatusCode;
-                }
+                using var client = new HttpClient();
+                client.BaseAddress = new Uri($"{Server}");
+                client.Timeout = TimeSpan.FromSeconds(PostTimeoutSeconds);
+                var json = new StringContent(jsonString, Encoding.UTF8, "application/json");
+                var result = await client.PostAsync($"/api/ingestion/{AppId}/{queueName}", json);
+                return result.IsSuccessStatusCode;
             }
             catch (Exception)
             {
