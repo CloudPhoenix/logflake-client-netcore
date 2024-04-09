@@ -71,6 +71,7 @@ namespace NLogFlake
             try
             {
                 using var client = new HttpClient();
+                client.DefaultRequestHeaders.Add("User-Agent", "logflake-client-netcore/1.3.0");
                 client.BaseAddress = new Uri($"{Server}");
                 client.Timeout = TimeSpan.FromSeconds(PostTimeoutSeconds);
                 var json = new StringContent(jsonString, Encoding.UTF8, "application/json");
