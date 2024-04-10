@@ -74,7 +74,7 @@ namespace NLogFlake
             try
             {
                 using var client = new HttpClient();
-                client.DefaultRequestHeaders.Add("User-Agent", "logflake-client-netcore/1.4.0");
+                client.DefaultRequestHeaders.Add("User-Agent", "logflake-client-netcore/1.4.1");
                 client.BaseAddress = new Uri($"{Server}");
                 client.Timeout = TimeSpan.FromSeconds(PostTimeoutSeconds);
                 var requestUri = $"/api/ingestion/{AppId}/{queueName}";
@@ -82,7 +82,8 @@ namespace NLogFlake
                 if (EnableCompression)
                 {
                     var jsonStringBytes = Encoding.UTF8.GetBytes(jsonString);
-                    var compressed = Snappy.CompressToArray(jsonStringBytes);
+                    var base64String = Convert.ToBase64String(jsonStringBytes);
+                    var compressed = Snappy.CompressToArray(Encoding.UTF8.GetBytes(base64String));
                     var content = new ByteArrayContent(compressed);
                     content.Headers.Remove("Content-Type");
                     content.Headers.Add("Content-Type", "application/octet-stream");
