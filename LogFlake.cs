@@ -2,12 +2,14 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using NLogFlake.Models;
+using Snappier;
 
 namespace NLogFlake
 {
@@ -24,6 +26,7 @@ namespace NLogFlake
 
         public int FailedPostRetries { get; set; } = 3;
         public int PostTimeoutSeconds { get; set; } = 3;
+        public bool EnableCompression { get; set; } = true; 
 
         public void SetHostname() => SetHostname(null);
 
@@ -71,11 +74,25 @@ namespace NLogFlake
             try
             {
                 using var client = new HttpClient();
-                client.DefaultRequestHeaders.Add("User-Agent", "logflake-client-netcore/1.3.0");
+                client.DefaultRequestHeaders.Add("User-Agent", "logflake-client-netcore/1.4.0");
                 client.BaseAddress = new Uri($"{Server}");
                 client.Timeout = TimeSpan.FromSeconds(PostTimeoutSeconds);
-                var json = new StringContent(jsonString, Encoding.UTF8, "application/json");
-                var result = await client.PostAsync($"/api/ingestion/{AppId}/{queueName}", json);
+                var requestUri = $"/api/ingestion/{AppId}/{queueName}";
+                HttpResponseMessage result;
+                if (EnableCompression)
+                {
+                    var jsonStringBytes = Encoding.UTF8.GetBytes(jsonString);
+                    var compressed = Snappy.CompressToArray(jsonStringBytes);
+                    var content = new ByteArrayContent(compressed);
+                    content.Headers.Remove("Content-Type");
+                    content.Headers.Add("Content-Type", "application/octet-stream");
+                    result = await client.PostAsync(requestUri, content);
+                }
+                else
+                {
+                    var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
+                    result = await client.PostAsync(requestUri, content);
+                }
                 return result.IsSuccessStatusCode;
             }
             catch (Exception)
