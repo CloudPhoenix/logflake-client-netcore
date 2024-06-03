@@ -15,10 +15,10 @@ public static class IApplicationBuilderExtensions
 {
     public static void ConfigureLogFlakeExceptionHandler(this IApplicationBuilder app, IConfiguration configuration)
     {
-        app.UseExceptionHandler(applicationBuilder => applicationBuilder.Run(async httpContext => await ConfigureLogFlakeExceptionHandler(httpContext)));
+        app.UseExceptionHandler(applicationBuilder => applicationBuilder.Run(async httpContext => await ConfigureLogFlakeExceptionHandlerAsync(httpContext)));
     }
 
-    private static async Task ConfigureLogFlakeExceptionHandler(HttpContext httpContext)
+    private static async Task ConfigureLogFlakeExceptionHandlerAsync(HttpContext httpContext)
     {
         httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
         httpContext.Response.ContentType = "application/json";

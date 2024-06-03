@@ -9,7 +9,7 @@ internal static class HttpContextHelper
 {
     internal static async Task<Dictionary<string, object>> GetLogParametersAsync(HttpContext httpContext, bool includeResponse)
     {
-        string? request = await GetStringBody(httpContext.Request.Body);
+        string? request = await GetStringBodyAsync(httpContext.Request.Body);
         Dictionary<string, object> exceptionParams = new()
         {
             {"Request uri", new Uri(httpContext.Request.GetDisplayUrl())},
@@ -27,7 +27,7 @@ internal static class HttpContextHelper
             exceptionParams.Add("Response headers", httpContext.Response.Headers);
             exceptionParams.Add("Response status", httpContext.Response.StatusCode);
 
-            string? response = await GetStringBody(httpContext.Response.Body);
+            string? response = await GetStringBodyAsync(httpContext.Response.Body);
             if (!string.IsNullOrWhiteSpace(response))
             {
                 exceptionParams.Add("Response body", response);
@@ -77,7 +77,7 @@ internal static class HttpContextHelper
         return clientId;
     }
 
-    internal static async Task<string> GetStringBody(Stream body)
+    internal static async Task<string> GetStringBodyAsync(Stream body)
     {
         using StreamReader bodyStream = new(body);
         bodyStream.BaseStream.Seek(0, SeekOrigin.Begin);
