@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLogFlake.Constants;
 using NLogFlake.Helpers;
+using NLogFlake.Middlewares;
 using NLogFlake.Services;
 
 namespace NLogFlake;
@@ -15,6 +16,8 @@ public static class IApplicationBuilderExtensions
 {
     public static void ConfigureLogFlakeExceptionHandler(this IApplicationBuilder app, IConfiguration configuration)
     {
+        app.UseMiddleware<LogFlakeMiddleware>();
+
         app.UseExceptionHandler(applicationBuilder => applicationBuilder.Run(async httpContext => await ConfigureLogFlakeExceptionHandlerAsync(httpContext)));
     }
 
