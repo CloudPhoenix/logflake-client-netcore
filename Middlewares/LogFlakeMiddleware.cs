@@ -16,7 +16,7 @@ public class LogFlakeMiddleware
         _next = next;
     }
 
-    public async Task Invoke(HttpContext httpContext, ILogFlakeService logFlakeService, ICorrelationService correlationService)
+    public async Task InvokeAsync(HttpContext httpContext, ILogFlakeService logFlakeService, ICorrelationService correlationService)
     {
         LogFlakeMiddlewareHelper.ValidateArguments(httpContext, logFlakeService, correlationService);
 
