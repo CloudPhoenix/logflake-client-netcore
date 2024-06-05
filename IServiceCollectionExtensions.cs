@@ -1,21 +1,19 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NLogFlake.Constants;
 using NLogFlake.Models.Options;
 using NLogFlake.Services;
 
 namespace NLogFlake;
 
-public static class IServicesExtensions
+public static class IServiceCollectionExtensions
 {
     public static IServiceCollection AddLogFlake(this IServiceCollection services, IConfiguration configuration)
     {
         _ = services.Configure<LogFlakeOptions>(configuration.GetSection(LogFlakeOptions.SectionName))
-            .AddOptionsWithValidateOnStart<LogFlakeOptions, LogFlakeOptionsValidator>();
+           .AddOptionsWithValidateOnStart<LogFlakeOptions, LogFlakeOptionsValidator>();
 
-        _ = services.Configure<LogFlakeSettingsOptions>(configuration.GetSection(LogFlakeSettingsOptions.SectionName))
-            .AddOptionsWithValidateOnStart<LogFlakeSettingsOptions, LogFlakeSettingsOptionsValidator>();
-
-        services.AddHttpClient();
+        services.AddHttpClient(HttpClientConstants.ClientName, ConfigureClient);
 
         services.AddScoped<ICorrelationService, CorrelationService>();
 
@@ -23,5 +21,12 @@ public static class IServicesExtensions
         services.AddSingleton<ILogFlakeService, LogFlakeService>();
 
         return services;
+    }
+
+    private static void ConfigureClient(HttpClient client)
+    {
+        client.Timeout = TimeSpan.FromSeconds(HttpClientConstants.PostTimeoutSeconds);
+        client.DefaultRequestHeaders.Add("Accept", "application/json");
+        client.DefaultRequestHeaders.Add("User-Agent", "logflake-client-netcore/1.5.0");
     }
 }

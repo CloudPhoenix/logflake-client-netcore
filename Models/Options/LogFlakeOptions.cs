@@ -10,5 +10,5 @@ internal sealed class LogFlakeOptions
     public string? AppId { get; set; }
 
     [Url]
-    public Uri? Endpoint { get; set; }
+    public string? Endpoint { get; set; }
 }
