@@ -24,7 +24,10 @@ public class LogFlakeService : ILogFlakeService
     {
         _logFlake.SendException(ex, correlation);
 
-        WriteLog(LogLevels.FATAL, string.IsNullOrWhiteSpace(message) ? (ex?.Message ?? string.Empty) : $"{message}\n{ex?.Message ?? string.Empty}", correlation, parameters);
+        if (!string.IsNullOrWhiteSpace(message) || (parameters is not null && parameters.Count > 0))
+        {
+            WriteLog(LogLevels.ERROR, message ?? $"{ex.GetType()}: details", correlation, parameters);
+        }
     }
 
     public IPerformanceCounter MeasurePerformance(string label) => _logFlake.MeasurePerformance(label);
