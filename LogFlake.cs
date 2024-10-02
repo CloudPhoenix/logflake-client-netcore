@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
@@ -51,6 +51,7 @@ internal class LogFlake : ILogFlake, IDisposable
     protected void Shutdown()
     {
         IsShuttingDown = true;
+        _processLogs.Set();
         LogsProcessorThread.Join();
     }
 
