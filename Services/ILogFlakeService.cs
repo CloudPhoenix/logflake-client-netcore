@@ -1,6 +1,6 @@
 namespace NLogFlake.Services;
 
-public interface ILogFlakeService
+public interface ILogFlakeService : IDisposable
 {
     void WriteLog(LogLevels logLevel, string? message, string? correlation, Dictionary<string, object>? parameters = null);
 

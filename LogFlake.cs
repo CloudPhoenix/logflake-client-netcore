@@ -10,7 +10,7 @@ using Snappier;
 
 namespace NLogFlake;
 
-internal class LogFlake : ILogFlake
+internal class LogFlake : ILogFlake, IDisposable
 {
     private Uri Server { get; set; }
     private string? _hostname = Environment.MachineName;
@@ -44,11 +44,14 @@ internal class LogFlake : ILogFlake
         _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
     }
 
+    public void Dispose() => Shutdown();
+
     ~LogFlake() => Shutdown();
 
-    public void Shutdown()
+    protected void Shutdown()
     {
         IsShuttingDown = true;
+        _processLogs.Set();
         LogsProcessorThread.Join();
     }
 

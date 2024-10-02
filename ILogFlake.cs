@@ -1,6 +1,6 @@
 namespace NLogFlake;
 
-public interface ILogFlake
+public interface ILogFlake : IDisposable
 {
     void SendLog(string content, Dictionary<string, object>? parameters = null);
 

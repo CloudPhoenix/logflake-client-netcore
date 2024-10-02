@@ -46,4 +46,5 @@ public class LogFlakeService : ILogFlakeService
         return true;
     }
 
+    public void Dispose() => _logFlake.Dispose();
 }
