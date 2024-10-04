@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using NLogFlake.Constants;
 using NLogFlake.Models.Options;
 using NLogFlake.Services;
@@ -12,6 +13,8 @@ public static class IServiceCollectionExtensions
     {
         _ = services.Configure<LogFlakeOptions>(configuration.GetSection(LogFlakeOptions.SectionName))
            .AddOptionsWithValidateOnStart<LogFlakeOptions, LogFlakeOptionsValidator>();
+
+        services.TryAddSingleton<IVersionService, VersionService>();
 
         services.AddHttpClient(HttpClientConstants.ClientName, ConfigureClient);
 
