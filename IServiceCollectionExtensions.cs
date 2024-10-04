@@ -28,6 +28,6 @@ public static class IServiceCollectionExtensions
     {
         client.Timeout = TimeSpan.FromSeconds(HttpClientConstants.PostTimeoutSeconds);
         client.DefaultRequestHeaders.Add("Accept", "application/json");
-        client.DefaultRequestHeaders.Add("User-Agent", "logflake-client-netcore/1.7.0");
+        client.DefaultRequestHeaders.Add("User-Agent", "logflake-client-netcore/1.8.1");
     }
 }
