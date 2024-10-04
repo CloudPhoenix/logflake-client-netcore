@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>LogFlake.Client.NetCore</PackageId>
-    <Version>1.7.0</Version>
+    <Version>1.8.0</Version>
     <Authors>CloudPhoenix Srl</Authors>
     <Company>CloudPhoenix Srl</Company>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -23,6 +23,7 @@
     <Folder Include="Models\" />
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Ben.Demystifier" Version="0.4.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
