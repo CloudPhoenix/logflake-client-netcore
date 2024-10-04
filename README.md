@@ -19,9 +19,15 @@
   "Endpoint": "https://logflake-instance-here"  // optional, if missing uses production endpoint
 }
 ```
-3. Implement and register as Sigleton the interface `IVersionService`;
+3. ℹ️ Optional: Implement and register as a Singleton the interface `IVersionService`;
 4. In your `Program.cs` files, register the LogFlake-related services:
 ```csharp
+// configuration is an instance of IConfiguration
+services.AddLogFlake(configuration);
+```
+> ℹ️ If you registered a custom implementation `IVersionService`; your registration must come before LogFlake services registration:
+```csharp
+services.AddSingleton<IVersionService, MyVersionService>();
 // configuration is an instance of IConfiguration
 services.AddLogFlake(configuration);
 ```

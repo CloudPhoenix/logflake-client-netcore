@@ -9,4 +9,6 @@ public interface IPerformanceCounter
     long Stop();
 
     long Pause();
+
+    void SetLabel(string label);
 }
