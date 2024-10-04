@@ -4,22 +4,28 @@ namespace NLogFlake;
 
 internal class PerformanceCounter : IPerformanceCounter
 {
-    private readonly LogFlake _instance;
-    private readonly string _label;
+    private readonly ILogFlake _logFlake;
     private readonly Stopwatch _internalStopwatch;
 
-    private bool AlreadySent { get; set; }
+    private string? _label;
+    private bool _alreadySent;
 
-    internal PerformanceCounter(LogFlake instance, string label)
+    internal PerformanceCounter(ILogFlake logFlake, string label)
     {
-        _instance = instance;
+        _logFlake = logFlake ?? throw new ArgumentNullException(nameof(logFlake));
         _label = label;
+        _internalStopwatch = Stopwatch.StartNew();
+    }
+
+    internal PerformanceCounter(ILogFlake logFlake)
+    {
+        _logFlake = logFlake ?? throw new ArgumentNullException(nameof(logFlake));
         _internalStopwatch = Stopwatch.StartNew();
     }
 
     ~PerformanceCounter()
     {
-        if (!AlreadySent) Stop();
+        if (!_alreadySent) Stop();
     }
 
     public void Start() => _internalStopwatch.Start();
@@ -30,16 +36,23 @@ internal class PerformanceCounter : IPerformanceCounter
 
     public long Pause() => Stop(false);
 
+    public void SetLabel(string label) => _label = label;
+
     private long Stop(bool shouldSend)
     {
+        if (string.IsNullOrWhiteSpace(_label))
+        {
+            throw new ArgumentNullException("label");
+        }
+
         _internalStopwatch.Stop();
         if (!shouldSend)
         {
             return _internalStopwatch.ElapsedMilliseconds;
         }
 
-        AlreadySent = true;
-        _instance.SendPerformance(_label, _internalStopwatch.ElapsedMilliseconds);
+        _alreadySent = true;
+        _logFlake.SendPerformance(_label, _internalStopwatch.ElapsedMilliseconds);
 
         return _internalStopwatch.ElapsedMilliseconds;
     }
