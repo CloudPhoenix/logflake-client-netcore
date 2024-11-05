@@ -17,7 +17,7 @@ public class LogFlakeService : ILogFlakeService
     {
         parameters ??= [];
 
-        _ = parameters.TryAdd("assemblyVersion", _version);
+        parameters["assemblyVersion"] = _version;
 
         _logFlake.SendLog(logLevel, correlation, message, parameters);
     }
