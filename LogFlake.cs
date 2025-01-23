@@ -1,30 +1,28 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Net;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Options;
 using NLogFlake.Constants;
+using NLogFlake.Factories;
+using NLogFlake.Extensions;
 using NLogFlake.Models;
-using NLogFlake.Models.Options;
 using Snappier;
 
 namespace NLogFlake;
 
 internal class LogFlake : ILogFlake, IDisposable
 {
-    private Uri Server { get; set; }
     private string? _hostname = Environment.MachineName;
-    private string AppId { get; set; }
 
     private readonly ConcurrentQueue<PendingLog> _logsQueue = new();
     private readonly ManualResetEvent _processLogs = new(false);
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IWebRequestFactory _webRequestFactory;
 
     private Thread LogsProcessorThread { get; set; }
     private bool IsShuttingDown { get; set; }
 
     internal int FailedPostRetries { get; set; } = 3;
-    internal bool EnableCompression { get; set; } = true;
 
     internal void SetHostname() => SetHostname(null);
 
@@ -32,16 +30,12 @@ internal class LogFlake : ILogFlake, IDisposable
 
     internal void SetHostname(string? hostname) => _hostname = string.IsNullOrWhiteSpace(hostname) ? null : hostname;
 
-    public LogFlake(IOptions<LogFlakeOptions> logFlakeOptions, IHttpClientFactory httpClientFactory)
+    public LogFlake(IWebRequestFactory webRequestFactory)
     {
-        AppId = logFlakeOptions.Value.AppId!;
-
-        Server = new Uri(logFlakeOptions.Value.Endpoint ?? ServersConstants.PRODUCTION);
-
         LogsProcessorThread = new Thread(LogsProcessor);
         LogsProcessorThread.Start();
 
-        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+        _webRequestFactory = webRequestFactory ?? throw new ArgumentNullException(nameof(webRequestFactory));
     }
 
     public void Dispose() => Shutdown();
@@ -65,7 +59,7 @@ internal class LogFlake : ILogFlake, IDisposable
         {
             _ = _logsQueue.TryDequeue(out PendingLog? log);
             log.Retries++;
-            bool success = Post(log.QueueName!, log.JsonString!).GetAwaiter().GetResult();
+            bool success = PostAsync(log.QueueName!, log.JsonString!).GetAwaiter().GetResult();
             if (!success && log.Retries < FailedPostRetries)
             {
                 _logsQueue.Enqueue(log);
@@ -80,7 +74,7 @@ internal class LogFlake : ILogFlake, IDisposable
         }
     }
 
-    private async Task<bool> Post(string queueName, string jsonString)
+    private async Task<bool> PostAsync(string queueName, string jsonString)
     {
         if (queueName != QueuesConstants.LOGS && queueName != QueuesConstants.PERFORMANCES)
         {
@@ -89,32 +83,26 @@ internal class LogFlake : ILogFlake, IDisposable
 
         try
         {
-            string requestUri = $"/api/ingestion/{AppId}/{queueName}";
-            HttpResponseMessage result = new(System.Net.HttpStatusCode.InternalServerError);
-            using HttpClient httpClient = _httpClientFactory.CreateClient(HttpClientConstants.ClientName);
-            httpClient.BaseAddress = Server;
-            if (EnableCompression)
-            {
-                byte[] jsonStringBytes = Encoding.UTF8.GetBytes(jsonString);
-                string base64String = Convert.ToBase64String(jsonStringBytes);
-                byte[] compressed = Snappy.CompressToArray(Encoding.UTF8.GetBytes(base64String));
-                ByteArrayContent content = new(compressed);
-                content.Headers.Remove("Content-Type");
-                content.Headers.Add("Content-Type", "application/octet-stream");
-                result = await httpClient.PostAsync(requestUri, content);
-            }
-            else
-            {
-                StringContent content = new(jsonString, Encoding.UTF8, "application/json");
-                result = await httpClient.PostAsync(requestUri, content);
-            }
+            HttpWebRequest req = _webRequestFactory.Create(queueName);
+            using Stream requestStream = await req.GetRequestStreamAsync();
 
-            return result.IsSuccessStatusCode;
+            await requestStream.WriteAsync(Compress(jsonString));
+
+            using WebResponse webResponse = await req.GetResponseAsync();
+            return webResponse.IsSuccessStatusCode();
         }
         catch (Exception)
         {
             return false;
         }
+    }
+
+    private static byte[] Compress(string jsonString)
+    {
+        byte[] jsonStringBytes = Encoding.UTF8.GetBytes(jsonString);
+        string base64String = Convert.ToBase64String(jsonStringBytes);
+
+        return Snappy.CompressToArray(Encoding.UTF8.GetBytes(base64String));
     }
 
     public void SendLog(string content, Dictionary<string, object>? parameters = null) => SendLog(LogLevels.DEBUG, content, parameters);
