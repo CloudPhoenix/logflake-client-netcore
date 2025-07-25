@@ -32,8 +32,6 @@ public class LogFlakeService : ILogFlakeService
         }
     }
 
-    public IPerformanceCounter MeasurePerformance() => _logFlake.MeasurePerformance();
-
     public IPerformanceCounter MeasurePerformance(string label) => _logFlake.MeasurePerformance(label);
 
     public bool SendPerformance(string label, long duration)

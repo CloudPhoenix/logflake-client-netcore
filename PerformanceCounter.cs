@@ -17,12 +17,6 @@ internal class PerformanceCounter : IPerformanceCounter
         _internalStopwatch = Stopwatch.StartNew();
     }
 
-    internal PerformanceCounter(ILogFlake logFlake)
-    {
-        _logFlake = logFlake ?? throw new ArgumentNullException(nameof(logFlake));
-        _internalStopwatch = Stopwatch.StartNew();
-    }
-
     ~PerformanceCounter()
     {
         if (!_alreadySent) Stop();
