@@ -180,7 +180,5 @@ internal class LogFlake : ILogFlake, IDisposable
         _processLogs.Set();
     }
 
-    public IPerformanceCounter MeasurePerformance() => new PerformanceCounter(this);
-
     public IPerformanceCounter MeasurePerformance(string label) => new PerformanceCounter(this, label);
 }

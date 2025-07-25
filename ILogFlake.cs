@@ -14,7 +14,5 @@ public interface ILogFlake : IDisposable
 
     void SendPerformance(string label, long duration);
 
-    IPerformanceCounter MeasurePerformance();
-
     IPerformanceCounter MeasurePerformance(string label);
 }
