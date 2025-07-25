@@ -7,11 +7,16 @@ internal class PerformanceCounter : IPerformanceCounter
     private readonly ILogFlake _logFlake;
     private readonly Stopwatch _internalStopwatch;
 
-    private string? _label;
+    private string _label;
     private bool _alreadySent;
 
     internal PerformanceCounter(ILogFlake logFlake, string label)
     {
+        if (string.IsNullOrWhiteSpace(label))
+        {
+            throw new ArgumentNullException(nameof(label));
+        }
+
         _logFlake = logFlake ?? throw new ArgumentNullException(nameof(logFlake));
         _label = label;
         _internalStopwatch = Stopwatch.StartNew();
@@ -30,16 +35,20 @@ internal class PerformanceCounter : IPerformanceCounter
 
     public long Pause() => Stop(false);
 
-    public void SetLabel(string label) => _label = label;
+    public void SetLabel(string label)
+    {
+        if (string.IsNullOrWhiteSpace(label))
+        {
+            throw new ArgumentNullException(nameof(label));
+        }
+
+        _label = label;
+    }
 
     private long Stop(bool shouldSend)
     {
-        if (string.IsNullOrWhiteSpace(_label))
-        {
-            throw new ArgumentNullException("label");
-        }
-
         _internalStopwatch.Stop();
+
         if (!shouldSend)
         {
             return _internalStopwatch.ElapsedMilliseconds;
