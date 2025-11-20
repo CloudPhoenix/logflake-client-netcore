@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using NLogFlake.Constants;
+using NLogFlake.Extensions;
 using NLogFlake.Models.Options;
 using NLogFlake.Services;
 
@@ -16,18 +17,11 @@ public static class IServiceCollectionExtensions
 
         services.TryAddSingleton<IVersionService, VersionService>();
 
-        services.AddHttpClient(HttpClientConstants.ClientName, ConfigureClient);
+        services.AddHttpClient(HttpClientConstants.ClientName, (_, client) => client.ConfigureClient());
 
         services.AddSingleton<ILogFlake, LogFlake>();
         services.AddSingleton<ILogFlakeService, LogFlakeService>();
 
         return services;
-    }
-
-    private static void ConfigureClient(HttpClient client)
-    {
-        client.Timeout = TimeSpan.FromSeconds(HttpClientConstants.PostTimeoutSeconds);
-        client.DefaultRequestHeaders.Add("Accept", "application/json");
-        client.DefaultRequestHeaders.Add("User-Agent", "logflake-client-netcore/1.8.3");
     }
 }
